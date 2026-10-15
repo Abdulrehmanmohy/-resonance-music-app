@@ -27,7 +27,7 @@ export default function App() {
   return (
     <PlayerProvider>
       <div className="relative min-h-screen bg-[#131313] text-[#e5e2e1] antialiased overflow-x-hidden selection:bg-[#ddb7ff] selection:text-[#490080]">
-        {/* Ambient Light Orbs / Radial Backdrop Glows (Stitch Design Specification) */}
+        {/* Ambient Light Orbs / Radial Backdrop Glows */}
         <div className="fixed top-0 left-1/4 -translate-x-1/2 w-[380px] h-[380px] bg-[#b76dff]/15 rounded-full blur-[130px] pointer-events-none z-0" />
         <div className="fixed top-1/3 right-0 w-[300px] h-[300px] bg-[#03b5d3]/12 rounded-full blur-[120px] pointer-events-none z-0" />
         <div className="fixed bottom-10 left-10 w-[320px] h-[320px] bg-[#ddb7ff]/10 rounded-full blur-[140px] pointer-events-none z-0" />

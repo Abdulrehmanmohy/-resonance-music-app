@@ -11,7 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <p align="center">
-  <b>Resonance</b> is an ultra-modern, high-fidelity music streaming application crafted with Google Stitch's <b>"Sonic Luxe"</b> design system. Featuring high-res dynamic album artwork, seamless uninterrupted audio playback, synchronized live karaoke lyrics, and a multi-lingual regional catalog spanning <b>Urdu, Coke Studio, Bollywood, Punjabi, and Global Billboard</b> hits.
+  <b>Resonance</b> is an ultra-modern, high-fidelity music streaming application crafted with a custom <b>"Sonic Luxe"</b> design architecture. Featuring high-res dynamic album artwork, seamless uninterrupted audio playback, synchronized live karaoke lyrics, and a multi-lingual regional catalog spanning <b>Urdu, Coke Studio, Bollywood, Punjabi, and Global Billboard</b> hits.
 </p>
 
 [Explore Features](#-core-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [API Documentation](#-api-endpoints) • [Design System](#-sonic-luxe-design-system)
@@ -80,7 +80,7 @@ Resonance bridges raw emotive musical artistry with contemporary hyper-responsiv
 
 ## 🎨 "Sonic Luxe" Design System
 
-Designed strictly around the Google Stitch **Sonic Luxe** aesthetic:
+Engineered strictly around the bespoke **Sonic Luxe** aesthetic:
 
 | Token | Value | Visual Purpose |
 | :--- | :--- | :--- |
@@ -197,5 +197,5 @@ This project is licensed under the **MIT License** — feel free to use, modify,
 ---
 
 <div align="center">
-  <sub>Engineered with precision by <b>Abdulrehman Mohy</b>. Powered by Google Stitch & React 19.</sub>
+  <sub>Engineered with precision by <b>Abdulrehman Mohy</b>. Built with React 19, Vite, and Tailwind CSS.</sub>
 </div>
