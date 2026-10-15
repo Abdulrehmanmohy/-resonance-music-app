@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 
 const PlayerContext = createContext();
 
@@ -18,10 +18,36 @@ export function PlayerProvider({ children }) {
     releaseDate: '2022',
   };
 
+  const defaultLikedSongs = [
+    initialTrack,
+    {
+      id: 'indian_1',
+      title: 'Kesariya',
+      artist: 'Arijit Singh & Pritam',
+      album: 'Brahmastra',
+      artwork: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80',
+      durationMs: 268000,
+      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/90/e5/22/90e522d0-7a05-1a3b-2877-c918c544e311/mzaf_4614213303668102148.plus.aac.p.m4a',
+      genre: 'Bollywood',
+      releaseDate: '2022',
+    },
+    {
+      id: 'eng_1',
+      title: 'Blinding Lights',
+      artist: 'The Weeknd',
+      album: 'After Hours',
+      artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
+      durationMs: 200000,
+      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/cd/b9/eb/cdb9eb57-0a42-7efc-d10a-3a223f03b5f9/mzaf_12411624896068305719.plus.aac.p.m4a',
+      genre: 'Synthwave / Pop',
+      releaseDate: '2020',
+    },
+  ];
+
   const [currentTrack, setCurrentTrack] = useState(initialTrack);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(30); // 30s preview or full
+  const [duration, setDuration] = useState(30);
   const [volume, setVolumeState] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [repeatMode, setRepeatMode] = useState('all'); // 'off' | 'all' | 'one'
@@ -34,24 +60,131 @@ export function PlayerProvider({ children }) {
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsList, setLyricsList] = useState([]);
 
-  // Liked tracks set (persisted in localStorage)
-  const [likedTracks, setLikedTracks] = useState(() => {
+  // Liked songs collection persisted in localStorage
+  const [likedSongs, setLikedSongs] = useState(() => {
     try {
-      const saved = localStorage.getItem('resonance_liked_tracks');
-      return saved ? JSON.parse(saved) : ['urdu_1', 'indian_1', 'eng_1'];
+      const saved = localStorage.getItem('resonance_liked_songs');
+      return saved ? JSON.parse(saved) : defaultLikedSongs;
     } catch {
-      return ['urdu_1', 'indian_1', 'eng_1'];
+      return defaultLikedSongs;
     }
   });
 
-  // Save liked tracks
+  // Save liked songs to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('resonance_liked_tracks', JSON.stringify(likedTracks));
+      localStorage.setItem('resonance_liked_songs', JSON.stringify(likedSongs));
     } catch (e) {
-      console.error(e);
+      console.error('Error saving liked songs:', e);
     }
-  }, [likedTracks]);
+  }, [likedSongs]);
+
+  const likedTracks = likedSongs.map((t) => t.id);
+
+  // Refs for stable callback access in audio listeners
+  const playNextRef = useRef(null);
+  const repeatModeRef = useRef(repeatMode);
+  repeatModeRef.current = repeatMode;
+
+  const playTrack = useCallback((track, newQueue = null) => {
+    if (!track) return;
+    setCurrentTrack(track);
+    setCurrentTime(0);
+
+    if (newQueue && newQueue.length > 0) {
+      setQueue(newQueue);
+      const idx = newQueue.findIndex((t) => t.id === track.id);
+      setQueueIndex(idx >= 0 ? idx : 0);
+    } else {
+      setQueue((prevQueue) => {
+        if (!prevQueue.some((t) => t.id === track.id)) {
+          setQueueIndex(prevQueue.length);
+          return [...prevQueue, track];
+        } else {
+          const idx = prevQueue.findIndex((t) => t.id === track.id);
+          setQueueIndex(idx);
+          return prevQueue;
+        }
+      });
+    }
+
+    if (audioRef.current) {
+      audioRef.current.src = track.streamUrl || '';
+      audioRef.current.load();
+      audioRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => {
+          console.warn('Playback autoplay notice:', err);
+          setIsPlaying(false);
+        });
+    }
+  }, []);
+
+  const togglePlayPause = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      if (!audio.src && currentTrack?.streamUrl) {
+        audio.src = currentTrack.streamUrl;
+      }
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.warn('Play error:', err));
+    }
+  }, [isPlaying, currentTrack]);
+
+  const playNext = useCallback(() => {
+    if (queue.length === 0) return;
+    let nextIndex;
+    if (isShuffle) {
+      nextIndex = Math.floor(Math.random() * queue.length);
+    } else {
+      nextIndex = queueIndex + 1;
+      if (nextIndex >= queue.length) {
+        if (repeatModeRef.current === 'all') {
+          nextIndex = 0;
+        } else {
+          setIsPlaying(false);
+          return;
+        }
+      }
+    }
+    setQueueIndex(nextIndex);
+    const nextTrack = queue[nextIndex];
+    if (nextTrack) {
+      playTrack(nextTrack);
+    }
+  }, [queue, queueIndex, isShuffle, playTrack]);
+
+  // Keep playNextRef up to date
+  useEffect(() => {
+    playNextRef.current = playNext;
+  }, [playNext]);
+
+  const playPrev = useCallback(() => {
+    if (currentTime > 3 && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+      return;
+    }
+
+    if (queue.length === 0) return;
+    let prevIndex = queueIndex - 1;
+    if (prevIndex < 0) {
+      prevIndex = queue.length - 1;
+    }
+    setQueueIndex(prevIndex);
+    const prevTrack = queue[prevIndex];
+    if (prevTrack) {
+      playTrack(prevTrack);
+    }
+  }, [currentTime, queue, queueIndex, playTrack]);
 
   // Audio element events setup
   useEffect(() => {
@@ -69,11 +202,11 @@ export function PlayerProvider({ children }) {
     };
 
     const handleEnded = () => {
-      if (repeatMode === 'one') {
+      if (repeatModeRef.current === 'one') {
         audio.currentTime = 0;
         audio.play().catch(console.error);
-      } else {
-        playNext();
+      } else if (playNextRef.current) {
+        playNextRef.current();
       }
     };
 
@@ -93,7 +226,7 @@ export function PlayerProvider({ children }) {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [repeatMode, queue, queueIndex, currentTrack]);
+  }, [currentTrack]);
 
   // Sync volume with audio element
   useEffect(() => {
@@ -105,9 +238,13 @@ export function PlayerProvider({ children }) {
   // Fetch or generate lyrics when current track changes
   useEffect(() => {
     if (!currentTrack) return;
-    fetch(`/api/lyrics?title=${encodeURIComponent(currentTrack.title)}&artist=${encodeURIComponent(currentTrack.artist)}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(
+      `/api/lyrics?title=${encodeURIComponent(currentTrack.title)}&artist=${encodeURIComponent(
+        currentTrack.artist
+      )}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
         if (data.lyrics) {
           setLyricsList(data.lyrics);
         }
@@ -115,105 +252,13 @@ export function PlayerProvider({ children }) {
       .catch(() => {
         setLyricsList([
           { time: 0, text: `♪ ${currentTrack.title} by ${currentTrack.artist} ♪` },
-          { time: 5, text: "High fidelity sonic frequency activated" },
-          { time: 10, text: "Deep bass pulses resonating in rhythm" },
-          { time: 15, text: "Every beat echoing across the soundscape" },
-          { time: 20, text: "Feel the harmony in high definition" },
+          { time: 5, text: 'High fidelity sonic frequency activated' },
+          { time: 10, text: 'Deep bass pulses resonating in rhythm' },
+          { time: 15, text: 'Every beat echoing across the soundscape' },
+          { time: 20, text: 'Feel the harmony in high definition' },
         ]);
       });
   }, [currentTrack]);
-
-  const playTrack = (track, newQueue = null) => {
-    if (!track) return;
-    setCurrentTrack(track);
-    setCurrentTime(0);
-
-    if (newQueue && newQueue.length > 0) {
-      setQueue(newQueue);
-      const idx = newQueue.findIndex(t => t.id === track.id);
-      setQueueIndex(idx >= 0 ? idx : 0);
-    } else {
-      // If not in existing queue, append
-      if (!queue.some(t => t.id === track.id)) {
-        setQueue(prev => [...prev, track]);
-        setQueueIndex(queue.length);
-      } else {
-        const idx = queue.findIndex(t => t.id === track.id);
-        setQueueIndex(idx);
-      }
-    }
-
-    if (audioRef.current) {
-      audioRef.current.src = track.streamUrl || '';
-      audioRef.current.load();
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => {
-          console.warn('Playback autoplay notice:', err);
-          setIsPlaying(false);
-        });
-    }
-  };
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      if (!audio.src && currentTrack?.streamUrl) {
-        audio.src = currentTrack.streamUrl;
-      }
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => console.warn('Play error:', err));
-    }
-  };
-
-  const playNext = () => {
-    if (queue.length === 0) return;
-    let nextIndex;
-    if (isShuffle) {
-      nextIndex = Math.floor(Math.random() * queue.length);
-    } else {
-      nextIndex = queueIndex + 1;
-      if (nextIndex >= queue.length) {
-        if (repeatMode === 'all') {
-          nextIndex = 0;
-        } else {
-          setIsPlaying(false);
-          return;
-        }
-      }
-    }
-    setQueueIndex(nextIndex);
-    const nextTrack = queue[nextIndex];
-    if (nextTrack) {
-      playTrack(nextTrack);
-    }
-  };
-
-  const playPrev = () => {
-    if (currentTime > 3 && audioRef.current) {
-      // Seek back to start if already playing for a few seconds
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-      return;
-    }
-
-    if (queue.length === 0) return;
-    let prevIndex = queueIndex - 1;
-    if (prevIndex < 0) {
-      prevIndex = queue.length - 1;
-    }
-    setQueueIndex(prevIndex);
-    const prevTrack = queue[prevIndex];
-    if (prevTrack) {
-      playTrack(prevTrack);
-    }
-  };
 
   const seekTo = (seconds) => {
     if (audioRef.current) {
@@ -228,29 +273,30 @@ export function PlayerProvider({ children }) {
   };
 
   const toggleMute = () => {
-    setIsMuted(prev => !prev);
+    setIsMuted((prev) => !prev);
   };
 
   const toggleLike = (track) => {
-    const trackId = track?.id || currentTrack?.id;
-    if (!trackId) return;
+    const targetTrack = track || currentTrack;
+    if (!targetTrack || !targetTrack.id) return;
 
-    setLikedTracks(prev => {
-      if (prev.includes(trackId)) {
-        return prev.filter(id => id !== trackId);
+    setLikedSongs((prev) => {
+      const exists = prev.some((t) => t.id === targetTrack.id);
+      if (exists) {
+        return prev.filter((t) => t.id !== targetTrack.id);
       } else {
-        return [...prev, trackId];
+        return [targetTrack, ...prev];
       }
     });
   };
 
   const isLiked = (trackId) => {
     const id = trackId || currentTrack?.id;
-    return id ? likedTracks.includes(id) : false;
+    return id ? likedSongs.some((t) => t.id === id) : false;
   };
 
   const toggleRepeat = () => {
-    setRepeatMode(prev => {
+    setRepeatMode((prev) => {
       if (prev === 'off') return 'all';
       if (prev === 'all') return 'one';
       return 'off';
@@ -258,10 +304,9 @@ export function PlayerProvider({ children }) {
   };
 
   const toggleShuffle = () => {
-    setIsShuffle(prev => !prev);
+    setIsShuffle((prev) => !prev);
   };
 
-  // Format seconds to mm:ss
   const formatTime = (sec) => {
     if (!sec || isNaN(sec)) return '0:00';
     const mins = Math.floor(sec / 60);
@@ -286,6 +331,7 @@ export function PlayerProvider({ children }) {
         showLyrics,
         lyricsList,
         likedTracks,
+        likedSongs,
         playTrack,
         togglePlayPause,
         playNext,

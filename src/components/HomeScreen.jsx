@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 
-export default function HomeScreen({ onSelectArtist, onSelectPlaylist }) {
+export default function HomeScreen({ onSelectArtist }) {
   const { currentTrack, isPlaying, playTrack, togglePlayPause, isLiked, toggleLike } = usePlayer();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [trendingData, setTrendingData] = useState({
@@ -20,7 +20,6 @@ export default function HomeScreen({ onSelectArtist, onSelectPlaylist }) {
   ];
 
   useEffect(() => {
-    setLoading(true);
     fetch('/api/trending?region=all')
       .then(res => res.json())
       .then(data => {
@@ -155,16 +154,28 @@ export default function HomeScreen({ onSelectArtist, onSelectPlaylist }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {trendingData.urdu.map((track) => (
-                <TrackCard
-                  key={track.id}
-                  track={track}
-                  queueList={trendingData.urdu}
-                  onSelectArtist={onSelectArtist}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="animate-pulse p-3 rounded-2xl bg-[#1c1b1b]/80 border border-white/5 space-y-3">
+                    <div className="aspect-square w-full rounded-xl bg-white/5" />
+                    <div className="h-4 bg-white/10 rounded w-3/4" />
+                    <div className="h-3 bg-white/5 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {trendingData.urdu.map((track) => (
+                  <TrackCard
+                    key={track.id}
+                    track={track}
+                    queueList={trendingData.urdu}
+                    onSelectArtist={onSelectArtist}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* 2. Indian & Bollywood Hits */}
@@ -184,16 +195,28 @@ export default function HomeScreen({ onSelectArtist, onSelectPlaylist }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {trendingData.indian.map((track) => (
-                <TrackCard
-                  key={track.id}
-                  track={track}
-                  queueList={trendingData.indian}
-                  onSelectArtist={onSelectArtist}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="animate-pulse p-3 rounded-2xl bg-[#1c1b1b]/80 border border-white/5 space-y-3">
+                    <div className="aspect-square w-full rounded-xl bg-white/5" />
+                    <div className="h-4 bg-white/10 rounded w-3/4" />
+                    <div className="h-3 bg-white/5 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {trendingData.indian.map((track) => (
+                  <TrackCard
+                    key={track.id}
+                    track={track}
+                    queueList={trendingData.indian}
+                    onSelectArtist={onSelectArtist}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* 3. Global Billboard & English Hits */}
@@ -213,16 +236,28 @@ export default function HomeScreen({ onSelectArtist, onSelectPlaylist }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {trendingData.english.map((track) => (
-                <TrackCard
-                  key={track.id}
-                  track={track}
-                  queueList={trendingData.english}
-                  onSelectArtist={onSelectArtist}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="animate-pulse p-3 rounded-2xl bg-[#1c1b1b]/80 border border-white/5 space-y-3">
+                    <div className="aspect-square w-full rounded-xl bg-white/5" />
+                    <div className="h-4 bg-white/10 rounded w-3/4" />
+                    <div className="h-3 bg-white/5 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {trendingData.english.map((track) => (
+                  <TrackCard
+                    key={track.id}
+                    track={track}
+                    queueList={trendingData.english}
+                    onSelectArtist={onSelectArtist}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         </>
       )}

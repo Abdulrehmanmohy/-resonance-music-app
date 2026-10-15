@@ -497,6 +497,9 @@ app.post('/api/playlists', (req, res) => {
 app.post('/api/playlists/:id/tracks', (req, res) => {
   const { id } = req.params;
   const { track } = req.body;
+  if (!track || !track.id) {
+    return res.status(400).json({ error: 'Valid track is required' });
+  }
   const pl = playlists.find(p => p.id === id);
   if (!pl) return res.status(404).json({ error: 'Playlist not found' });
 

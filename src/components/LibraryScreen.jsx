@@ -2,38 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 
 export default function LibraryScreen({ onSelectArtist }) {
-  const { playTrack, togglePlayPause, currentTrack, isPlaying, likedTracks, toggleLike, isLiked, formatTime } = usePlayer();
+  const { playTrack, likedTracks, likedSongs } = usePlayer();
   const [filter, setFilter] = useState('playlists'); // 'playlists' | 'liked'
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
-  const [likedSongObjects, setLikedSongObjects] = useState([]);
 
   // Fetch playlists
   useEffect(() => {
     fetch('/api/playlists')
-      .then(res => res.json())
-      .then(data => setPlaylists(data))
+      .then((res) => res.json())
+      .then((data) => setPlaylists(data))
       .catch(console.error);
   }, []);
-
-  // Fetch liked songs details
-  useEffect(() => {
-    fetch('/api/trending?region=all')
-      .then(res => res.json())
-      .then(data => {
-        const all = [
-          ...(data.categories?.urdu || []),
-          ...(data.categories?.indian || []),
-          ...(data.categories?.english || []),
-        ];
-        const matched = all.filter(t => likedTracks.includes(t.id));
-        setLikedSongObjects(matched);
-      })
-      .catch(console.error);
-  }, [likedTracks]);
 
   const handleCreatePlaylist = (e) => {
     e.preventDefault();
@@ -44,9 +27,9 @@ export default function LibraryScreen({ onSelectArtist }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: newTitle, description: newDesc }),
     })
-      .then(res => res.json())
-      .then(created => {
-        setPlaylists(prev => [...prev, created]);
+      .then((res) => res.json())
+      .then((created) => {
+        setPlaylists((prev) => [...prev, created]);
         setShowCreateModal(false);
         setNewTitle('');
         setNewDesc('');
@@ -63,7 +46,7 @@ export default function LibraryScreen({ onSelectArtist }) {
             Your Library
           </h1>
           <p className="text-sm text-[#cfc2d6]/70 mt-1">
-            {playlists.length} playlists • {likedTracks.length} liked songs • Audiophile Fidelity
+            {playlists.length} playlists • {likedSongs.length} liked songs • Audiophile Fidelity
           </p>
         </div>
 
@@ -79,7 +62,10 @@ export default function LibraryScreen({ onSelectArtist }) {
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-3">
         <button
-          onClick={() => { setFilter('playlists'); setSelectedPlaylist(null); }}
+          onClick={() => {
+            setFilter('playlists');
+            setSelectedPlaylist(null);
+          }}
           className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
             filter === 'playlists' && !selectedPlaylist
               ? 'bg-[#ddb7ff] text-[#400071]'
@@ -89,14 +75,17 @@ export default function LibraryScreen({ onSelectArtist }) {
           All Playlists
         </button>
         <button
-          onClick={() => { setFilter('liked'); setSelectedPlaylist(null); }}
+          onClick={() => {
+            setFilter('liked');
+            setSelectedPlaylist(null);
+          }}
           className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
             filter === 'liked'
               ? 'bg-[#ddb7ff] text-[#400071]'
               : 'bg-[#201f1f] text-[#cfc2d6] hover:text-white'
           }`}
         >
-          Liked Songs ({likedTracks.length})
+          Liked Songs ({likedSongs.length})
         </button>
       </div>
 
@@ -122,10 +111,16 @@ export default function LibraryScreen({ onSelectArtist }) {
               />
             </div>
             <div className="space-y-2 text-center sm:text-left">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#4cd7f6]">PLAYLIST</span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">{selectedPlaylist.title}</h2>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#4cd7f6]">
+                PLAYLIST
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+                {selectedPlaylist.title}
+              </h2>
               <p className="text-xs text-[#cfc2d6]">{selectedPlaylist.description}</p>
-              <p className="text-xs text-[#ddb7ff]">{selectedPlaylist.tracks?.length || 0} Songs</p>
+              <p className="text-xs text-[#ddb7ff]">
+                {selectedPlaylist.tracks?.length || 0} Songs
+              </p>
 
               {selectedPlaylist.tracks?.length > 0 && (
                 <button
@@ -157,17 +152,23 @@ export default function LibraryScreen({ onSelectArtist }) {
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 p-6 rounded-3xl bg-gradient-to-br from-[#4a154b] to-[#1c1b1b] border border-[#ddb7ff]/20">
             <div className="w-36 h-36 rounded-2xl bg-gradient-to-tr from-[#b76dff] to-[#4cd7f6] flex items-center justify-center flex-shrink-0 shadow-2xl">
-              <span className="material-symbols-outlined text-6xl text-white fill-current">favorite</span>
+              <span className="material-symbols-outlined text-6xl text-white fill-current">
+                favorite
+              </span>
             </div>
             <div className="space-y-2 text-center sm:text-left">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#4cd7f6]">AUTO-COLLECTION</span>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#4cd7f6]">
+                AUTO-COLLECTION
+              </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Liked Songs</h2>
-              <p className="text-xs text-[#cfc2d6]">Your favorites stored locally and synced in lossless quality</p>
-              <p className="text-xs text-[#ddb7ff]">{likedSongObjects.length} Tracks Ready</p>
+              <p className="text-xs text-[#cfc2d6]">
+                Your favorites stored locally and synced in lossless quality
+              </p>
+              <p className="text-xs text-[#ddb7ff]">{likedSongs.length} Tracks Ready</p>
 
-              {likedSongObjects.length > 0 && (
+              {likedSongs.length > 0 && (
                 <button
-                  onClick={() => playTrack(likedSongObjects[0], likedSongObjects)}
+                  onClick={() => playTrack(likedSongs[0], likedSongs)}
                   className="mt-3 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#a855f7] to-[#4cd7f6] text-[#0e0e0e] font-extrabold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px]">play_arrow</span>
@@ -178,17 +179,17 @@ export default function LibraryScreen({ onSelectArtist }) {
           </div>
 
           <div className="space-y-2">
-            {likedSongObjects.length === 0 ? (
+            {likedSongs.length === 0 ? (
               <div className="text-center py-12 text-[#cfc2d6]">
                 <p>No liked songs yet! Click the heart icon on any track to add it here.</p>
               </div>
             ) : (
-              likedSongObjects.map((track, idx) => (
+              likedSongs.map((track, idx) => (
                 <PlaylistTrackRow
                   key={track.id || idx}
                   track={track}
                   index={idx}
-                  playlistQueue={likedSongObjects}
+                  playlistQueue={likedSongs}
                   onSelectArtist={onSelectArtist}
                 />
               ))
@@ -205,7 +206,9 @@ export default function LibraryScreen({ onSelectArtist }) {
               className="group relative flex flex-col p-4 rounded-2xl bg-gradient-to-br from-[#4a154b] to-[#201f1f] hover:from-[#5c1c5e] border border-[#ddb7ff]/30 cursor-pointer transition-all duration-300 shadow-xl hover:scale-[1.02]"
             >
               <div className="relative aspect-square w-full rounded-xl bg-gradient-to-tr from-[#b76dff] via-[#4cd7f6] to-[#b76dff] flex items-center justify-center mb-3 shadow-lg">
-                <span className="material-symbols-outlined text-4xl text-white fill-current">favorite</span>
+                <span className="material-symbols-outlined text-4xl text-white fill-current">
+                  favorite
+                </span>
               </div>
               <span className="text-base font-extrabold text-white truncate">Liked Songs</span>
               <span className="text-xs text-[#cfc2d6]/70 mt-1">{likedTracks.length} tracks</span>
@@ -289,7 +292,8 @@ export default function LibraryScreen({ onSelectArtist }) {
 }
 
 function PlaylistTrackRow({ track, index, playlistQueue, onSelectArtist }) {
-  const { currentTrack, isPlaying, playTrack, togglePlayPause, toggleLike, isLiked, formatTime } = usePlayer();
+  const { currentTrack, isPlaying, playTrack, togglePlayPause, toggleLike, isLiked, formatTime } =
+    usePlayer();
   const isCurrent = currentTrack?.id === track.id;
 
   return (
@@ -309,10 +313,20 @@ function PlaylistTrackRow({ track, index, playlistQueue, onSelectArtist }) {
           <img src={track.artwork} alt={track.title} className="w-full h-full object-cover" />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className={`text-sm font-bold truncate ${isCurrent ? 'text-[#ddb7ff]' : 'text-white'}`}>
+          <span
+            className={`text-sm font-bold truncate ${isCurrent ? 'text-[#ddb7ff]' : 'text-white'}`}
+          >
             {track.title}
           </span>
-          <span className="text-xs text-[#cfc2d6]/70 truncate">{track.artist}</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectArtist?.(track.artist);
+            }}
+            className="text-xs text-[#cfc2d6]/70 truncate text-left hover:text-[#ddb7ff] transition-colors"
+          >
+            {track.artist}
+          </button>
         </div>
       </div>
 
@@ -324,7 +338,11 @@ function PlaylistTrackRow({ track, index, playlistQueue, onSelectArtist }) {
           onClick={() => toggleLike(track)}
           className="w-8 h-8 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#ddb7ff] active:scale-90 transition-transform"
         >
-          <span className={`material-symbols-outlined text-[20px] ${isLiked(track.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''}`}>
+          <span
+            className={`material-symbols-outlined text-[20px] ${
+              isLiked(track.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''
+            }`}
+          >
             {isLiked(track.id) ? 'favorite' : 'favorite_border'}
           </span>
         </button>
