@@ -1,4 +1,5 @@
 import React from 'react';
+import { Search, Activity, SlidersHorizontal } from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab, onOpenSearch }) {
   return (
@@ -56,20 +57,20 @@ export default function Header({ activeTab, setActiveTab, onOpenSearch }) {
           aria-label="Search" 
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#ddb7ff] hover:bg-white/5 active:scale-95 transition-all"
         >
-          <span className="material-symbols-outlined text-[20px]">search</span>
+          <Search size={18} />
         </button>
         <button 
           aria-label="Equalizer" 
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#4cd7f6] hover:bg-white/5 active:scale-95 transition-all"
           title="Sonic Fidelity Active"
         >
-          <span className="material-symbols-outlined text-[20px]">equalizer</span>
+          <Activity size={18} />
         </button>
         <button 
           aria-label="Settings" 
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#ddb7ff] hover:bg-white/5 active:scale-95 transition-all"
         >
-          <span className="material-symbols-outlined text-[20px]">tune</span>
+          <SlidersHorizontal size={18} />
         </button>
       </div>
     </header>

@@ -1,5 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import {
+  ChevronDown,
+  Mic2,
+  Heart,
+  Shuffle,
+  SkipBack,
+  Play,
+  Pause,
+  SkipForward,
+  Repeat,
+  Repeat1,
+  Volume2,
+  VolumeX,
+  Volume1,
+} from 'lucide-react';
 
 export default function NowPlayingModal({ onOpenArtist }) {
   const {
@@ -7,36 +22,36 @@ export default function NowPlayingModal({ onOpenArtist }) {
     isPlaying,
     currentTime,
     duration,
-    volume,
-    isMuted,
-    repeatMode,
-    isShuffle,
-    isNowPlayingOpen,
-    showLyrics,
-    lyricsList,
     togglePlayPause,
     playNext,
     playPrev,
     seekTo,
+    volume,
     setVolume,
+    isMuted,
     toggleMute,
-    toggleLike,
-    isLiked,
+    repeatMode,
     toggleRepeat,
+    isShuffle,
     toggleShuffle,
+    isLiked,
+    toggleLike,
+    isNowPlayingOpen,
     setIsNowPlayingOpen,
+    showLyrics,
     setShowLyrics,
+    lyricsList,
     formatTime,
   } = usePlayer();
 
   const lyricsContainerRef = useRef(null);
 
-  // Auto-scroll lyrics to active line
+  // Auto-scroll lyrics to keep active line centered
   useEffect(() => {
     if (!showLyrics || !lyricsContainerRef.current) return;
-    const activeEl = lyricsContainerRef.current.querySelector('.active-lyric');
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const activeLineEl = lyricsContainerRef.current.querySelector('.lyric-active');
+    if (activeLineEl) {
+      activeLineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [currentTime, showLyrics]);
 
@@ -47,16 +62,16 @@ export default function NowPlayingModal({ onOpenArtist }) {
   const handleScrubberClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const newPercent = Math.max(0, Math.min(1, clickX / rect.width));
-    seekTo(newPercent * duration);
+    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+    seekTo(ratio * duration);
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#131313] animate-in fade-in slide-in-from-bottom duration-300">
-      {/* Ambient Radial Mesh Glows */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#b76dff]/20 blur-[130px]" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 rounded-full bg-[#4cd7f6]/15 blur-[120px]" />
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#131313] backdrop-blur-3xl animate-in fade-in duration-200">
+      {/* Background Ambient Glows */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#b76dff]/25 blur-[160px]" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-[#4cd7f6]/15 blur-[150px]" />
         <div className="absolute bottom-10 -left-20 w-88 h-88 rounded-full bg-[#ddb7ff]/20 blur-[140px]" />
       </div>
 
@@ -68,7 +83,7 @@ export default function NowPlayingModal({ onOpenArtist }) {
             className="flex items-center justify-center w-9 h-9 rounded-full text-white hover:text-[#ddb7ff] active:scale-90 transition-all"
             aria-label="Collapse view"
           >
-            <span className="material-symbols-outlined text-[26px]">keyboard_arrow_down</span>
+            <ChevronDown size={24} />
           </button>
 
           <div className="flex flex-col items-center text-center px-2 max-w-[220px] overflow-hidden">
@@ -81,13 +96,13 @@ export default function NowPlayingModal({ onOpenArtist }) {
           </div>
 
           <button
-            onClick={() => setShowLyrics(prev => !prev)}
+            onClick={() => setShowLyrics((prev) => !prev)}
             className={`flex items-center justify-center w-9 h-9 rounded-full transition-all active:scale-90 ${
               showLyrics ? 'bg-[#ddb7ff] text-[#400071] font-bold shadow-[0_0_12px_#ddb7ff]' : 'text-[#cfc2d6] hover:text-white'
             }`}
             title="Toggle Live Lyrics"
           >
-            <span className="material-symbols-outlined text-[22px]">lyrics</span>
+            <Mic2 size={18} />
           </button>
         </header>
 
@@ -98,60 +113,58 @@ export default function NowPlayingModal({ onOpenArtist }) {
             <div className="relative group w-72 h-72 sm:w-80 sm:h-80 mx-auto transition-transform duration-300">
               {/* Dynamic ambient art bloom */}
               <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#b76dff]/40 via-[#4cd7f6]/30 to-[#ddb7ff]/40 blur-2xl opacity-80 group-hover:opacity-100 transition duration-500" />
-              
-              <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/15 bg-[#0e0e0e] shadow-2xl">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#201f1f]">
                 <img
                   src={currentTrack.artwork}
                   alt={currentTrack.title}
-                  className="w-full h-full object-cover select-none pointer-events-none"
+                  className="w-full h-full object-cover select-none"
                 />
-
-                {/* Live Equalizer Overlay Pill */}
-                <div className="absolute bottom-3 right-3 flex items-end gap-1 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20">
-                  <div className={`w-1 bg-[#4cd7f6] rounded-full ${isPlaying ? 'equalizer-bar-1' : 'h-1'}`} />
-                  <div className={`w-1 bg-[#ddb7ff] rounded-full ${isPlaying ? 'equalizer-bar-2' : 'h-2'}`} />
-                  <div className={`w-1 bg-[#4cd7f6] rounded-full ${isPlaying ? 'equalizer-bar-3' : 'h-3'}`} />
-                  <div className={`w-1 bg-[#b76dff] rounded-full ${isPlaying ? 'equalizer-bar-4' : 'h-1.5'}`} />
-                </div>
               </div>
             </div>
           ) : (
-            /* Live Synchronized Karaoke Lyrics View */
-            <div 
+            /* Synchronized Live Lyrics View */
+            <div
               ref={lyricsContainerRef}
-              className="w-full h-80 sm:h-96 rounded-2xl bg-[#1c1b1b]/70 backdrop-blur-2xl border border-white/10 p-6 overflow-y-auto space-y-6 text-center select-none"
+              className="w-full h-80 sm:h-96 overflow-y-auto px-4 py-8 space-y-6 text-center scrollbar-none"
             >
-              <div className="text-xs font-bold uppercase tracking-wider text-[#4cd7f6] pb-2">
-                • Synchronized Live Lyrics •
+              <div className="text-xs uppercase tracking-widest text-[#4cd7f6] font-bold mb-4">
+                SYNCHRONIZED LIVE LYRICS
               </div>
-              {lyricsList.map((line, idx) => {
-                const nextTime = lyricsList[idx + 1]?.time || 9999;
-                const isActive = currentTime >= line.time && currentTime < nextTime;
-                return (
-                  <p
-                    key={idx}
-                    onClick={() => seekTo(line.time)}
-                    className={`transition-all duration-300 cursor-pointer font-bold ${
-                      isActive
-                        ? 'active-lyric text-xl sm:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-[#ddb7ff] to-[#4cd7f6] scale-105 drop-shadow-[0_0_12px_rgba(221,183,255,0.8)]'
-                        : 'text-base sm:text-lg text-white/40 hover:text-white/70'
-                    }`}
-                  >
-                    {line.text}
-                  </p>
-                );
-              })}
+              {lyricsList && lyricsList.length > 0 ? (
+                lyricsList.map((line, idx) => {
+                  const isCurrentLine =
+                    currentTime >= line.time &&
+                    (idx === lyricsList.length - 1 || currentTime < lyricsList[idx + 1].time);
+                  return (
+                    <p
+                      key={idx}
+                      onClick={() => seekTo(line.time)}
+                      className={`cursor-pointer transition-all duration-300 text-lg sm:text-xl font-bold leading-relaxed ${
+                        isCurrentLine
+                          ? 'lyric-active text-[#ddb7ff] scale-105 drop-shadow-[0_0_16px_rgba(221,183,255,0.7)]'
+                          : 'text-white/40 hover:text-white/80 scale-95'
+                      }`}
+                    >
+                      {line.text}
+                    </p>
+                  );
+                })
+              ) : (
+                <div className="text-center text-[#cfc2d6]/60 pt-20">
+                  <p>Instrumental track or audio frequency stream.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Title, Artist, & Like Section */}
+        {/* Track Title, Artist, & Like */}
         <div className="w-full flex items-center justify-between mt-6 px-1">
-          <div className="flex flex-col min-w-0 pr-4">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight truncate">
+          <div className="flex flex-col min-w-0 pr-3">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white truncate drop-shadow-sm">
               {currentTrack.title}
             </h2>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-0.5">
               <button
                 onClick={() => {
                   setIsNowPlayingOpen(false);
@@ -172,9 +185,10 @@ export default function NowPlayingModal({ onOpenArtist }) {
             className="w-11 h-11 rounded-full flex items-center justify-center text-white hover:text-[#ddb7ff] active:scale-90 transition-transform"
             aria-label="Add to Favorites"
           >
-            <span className={`material-symbols-outlined text-[28px] ${isLiked(currentTrack.id) ? 'text-[#ddb7ff] font-bold fill-current' : 'text-[#cfc2d6]'}`}>
-              {isLiked(currentTrack.id) ? 'favorite' : 'favorite_border'}
-            </span>
+            <Heart
+              size={24}
+              className={`${isLiked(currentTrack.id) ? 'fill-[#ddb7ff] text-[#ddb7ff]' : 'text-[#cfc2d6]'}`}
+            />
           </button>
         </div>
 
@@ -214,7 +228,7 @@ export default function NowPlayingModal({ onOpenArtist }) {
             }`}
             title={`Shuffle: ${isShuffle ? 'On' : 'Off'}`}
           >
-            <span className="material-symbols-outlined text-[24px]">shuffle</span>
+            <Shuffle size={20} />
           </button>
 
           {/* Previous Track */}
@@ -223,7 +237,7 @@ export default function NowPlayingModal({ onOpenArtist }) {
             className="w-12 h-12 rounded-full flex items-center justify-center text-white hover:text-[#ddb7ff] active:scale-90 transition-transform"
             aria-label="Previous"
           >
-            <span className="material-symbols-outlined text-[32px]">skip_previous</span>
+            <SkipBack size={26} />
           </button>
 
           {/* Master Play / Pause Pill */}
@@ -232,9 +246,11 @@ export default function NowPlayingModal({ onOpenArtist }) {
             className="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#a855f7] to-[#4cd7f6] text-[#0e0e0e] shadow-[0_0_24px_rgba(168,85,247,0.6)] hover:scale-105 active:scale-95 transition-all"
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
-            <span className="material-symbols-outlined text-[36px] font-extrabold">
-              {isPlaying ? 'pause' : 'play_arrow'}
-            </span>
+            {isPlaying ? (
+              <Pause size={28} className="fill-[#0e0e0e]" />
+            ) : (
+              <Play size={28} className="fill-[#0e0e0e] translate-x-0.5" />
+            )}
           </button>
 
           {/* Next Track */}
@@ -243,7 +259,7 @@ export default function NowPlayingModal({ onOpenArtist }) {
             className="w-12 h-12 rounded-full flex items-center justify-center text-white hover:text-[#ddb7ff] active:scale-90 transition-transform"
             aria-label="Next"
           >
-            <span className="material-symbols-outlined text-[32px]">skip_next</span>
+            <SkipForward size={26} />
           </button>
 
           {/* Repeat Mode Toggle */}
@@ -254,9 +270,7 @@ export default function NowPlayingModal({ onOpenArtist }) {
             }`}
             title={`Repeat: ${repeatMode}`}
           >
-            <span className="material-symbols-outlined text-[24px]">
-              {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
-            </span>
+            {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
           </button>
         </div>
 
@@ -268,9 +282,13 @@ export default function NowPlayingModal({ onOpenArtist }) {
               onClick={toggleMute}
               className="text-[#cfc2d6] hover:text-white active:scale-90 transition-transform"
             >
-              <span className="material-symbols-outlined text-[20px]">
-                {isMuted || volume === 0 ? 'volume_off' : volume > 0.5 ? 'volume_up' : 'volume_down'}
-              </span>
+              {isMuted || volume === 0 ? (
+                <VolumeX size={18} />
+              ) : volume > 0.5 ? (
+                <Volume2 size={18} />
+              ) : (
+                <Volume1 size={18} />
+              )}
             </button>
             <input
               type="range"

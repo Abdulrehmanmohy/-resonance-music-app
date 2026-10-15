@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { Play, Pause, Heart } from 'lucide-react';
 
 export default function HomeScreen({ onSelectArtist }) {
   const { currentTrack, isPlaying, playTrack, togglePlayPause, isLiked, toggleLike } = usePlayer();
@@ -116,19 +117,23 @@ export default function HomeScreen({ onSelectArtist }) {
               }}
               className="flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#a855f7] to-[#4cd7f6] text-[#0e0e0e] font-extrabold text-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105 active:scale-95 transition-all"
             >
-              <span className="material-symbols-outlined text-[24px]">
-                {currentTrack?.id === heroTrack.id && isPlaying ? 'pause' : 'play_arrow'}
-              </span>
+              {currentTrack?.id === heroTrack.id && isPlaying ? (
+                <Pause size={20} className="fill-[#0e0e0e]" />
+              ) : (
+                <Play size={20} className="fill-[#0e0e0e] translate-x-0.5" />
+              )}
               <span>{currentTrack?.id === heroTrack.id && isPlaying ? 'PAUSE' : 'PLAY NOW'}</span>
             </button>
 
             <button
               onClick={() => toggleLike(heroTrack)}
               className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/15 border border-white/15 text-white active:scale-90 transition-transform"
+              aria-label="Add hero track to favorites"
             >
-              <span className={`material-symbols-outlined text-[24px] ${isLiked(heroTrack.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''}`}>
-                {isLiked(heroTrack.id) ? 'favorite' : 'favorite_border'}
-              </span>
+              <Heart
+                size={22}
+                className={`${isLiked(heroTrack.id) ? 'fill-[#ddb7ff] text-[#ddb7ff]' : 'text-white'}`}
+              />
             </button>
           </div>
         </div>
@@ -319,9 +324,11 @@ function TrackCard({ track, queueList, onSelectArtist }) {
           }`}
           aria-label="Play song"
         >
-          <span className="material-symbols-outlined text-[22px] font-bold">
-            {isCurrent && isPlaying ? 'pause' : 'play_arrow'}
-          </span>
+          {isCurrent && isPlaying ? (
+            <Pause size={18} className="fill-[#0e0e0e]" />
+          ) : (
+            <Play size={18} className="fill-[#0e0e0e] translate-x-0.5" />
+          )}
         </button>
 
         {/* Like trigger button on top right */}
@@ -331,10 +338,12 @@ function TrackCard({ track, queueList, onSelectArtist }) {
             toggleLike(track);
           }}
           className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white/80 hover:text-[#ddb7ff] opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Like song"
         >
-          <span className={`material-symbols-outlined text-[16px] ${isLiked(track.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''}`}>
-            {isLiked(track.id) ? 'favorite' : 'favorite_border'}
-          </span>
+          <Heart
+            size={14}
+            className={`${isLiked(track.id) ? 'fill-[#ddb7ff] text-[#ddb7ff]' : 'text-white'}`}
+          />
         </button>
       </div>
 

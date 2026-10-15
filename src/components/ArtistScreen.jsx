@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { ArrowLeft, Play, Pause, Heart } from 'lucide-react';
 
 export default function ArtistScreen({ artistName, onBack }) {
   const { playTrack, togglePlayPause, currentTrack, isPlaying, isLiked, toggleLike, formatTime } = usePlayer();
@@ -8,12 +9,19 @@ export default function ArtistScreen({ artistName, onBack }) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    let ignore = false;
     fetch(`/api/artist/${encodeURIComponent(artistName)}`)
       .then(res => res.json())
-      .then(data => setArtistData(data))
+      .then(data => {
+        if (!ignore) setArtistData(data);
+      })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [artistName]);
 
   if (loading) {
@@ -44,7 +52,7 @@ export default function ArtistScreen({ artistName, onBack }) {
           onClick={onBack}
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#201f1f] text-white hover:text-[#ddb7ff] border border-white/10 active:scale-95 transition-all text-xs font-bold"
         >
-          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          <ArrowLeft size={16} />
           <span>Back</span>
         </button>
         <span className="text-xs uppercase tracking-widest text-[#4cd7f6] font-bold">ARTIST PROFILE</span>
@@ -84,7 +92,7 @@ export default function ArtistScreen({ artistName, onBack }) {
                 onClick={() => playTrack(artistData.topTracks[0], artistData.topTracks)}
                 className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#a855f7] to-[#4cd7f6] text-[#0e0e0e] font-extrabold text-xs shadow-xl shadow-[#a855f7]/30 hover:scale-105 active:scale-95 transition-all"
               >
-                <span className="material-symbols-outlined text-[20px]">play_arrow</span>
+                <Play size={16} className="fill-[#0e0e0e] translate-x-0.5" />
                 <span>PLAY ALL</span>
               </button>
             )}
@@ -93,41 +101,53 @@ export default function ArtistScreen({ artistName, onBack }) {
               onClick={() => setIsFollowing(prev => !prev)}
               className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all border ${
                 isFollowing
-                  ? 'bg-white/10 text-white border-white/30'
-                  : 'bg-transparent text-white border-white/40 hover:border-white'
+                  ? 'bg-transparent text-white border-white/30'
+                  : 'bg-[#ddb7ff] text-[#400071] border-transparent font-extrabold hover:scale-105'
               }`}
             >
-              {isFollowing ? 'FOLLOWING' : 'FOLLOW'}
+              {isFollowing ? 'Following' : 'Follow'}
             </button>
           </div>
         </div>
       </section>
 
-      {/* Popular Tracks Section */}
+      {/* Top 10 Popular Releases */}
       <section className="px-4 sm:px-6 space-y-4">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-          Popular Releases
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Popular Releases</h2>
+          <span className="text-xs text-[#cfc2d6]">Top 10 Streams</span>
+        </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {artistData.topTracks?.map((track, idx) => {
             const isCurrent = currentTrack?.id === track.id;
             return (
               <div
                 key={track.id || idx}
                 onClick={() => playTrack(track, artistData.topTracks)}
-                className={`group flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all duration-200 border ${
+                className={`group flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer ${
                   isCurrent
-                    ? 'bg-[#2a2a2a] border-[#ddb7ff]/40 shadow-[0_0_15px_rgba(221,183,255,0.15)]'
-                    : 'bg-[#1c1b1b]/80 hover:bg-[#201f1f] border-white/5'
+                    ? 'bg-[#353534]/70 border border-[#ddb7ff]/40 shadow-md'
+                    : 'hover:bg-[#201f1f]/80 border border-transparent'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0 pr-4">
-                  <span className="w-6 text-center text-xs font-mono text-[#cfc2d6]/50 flex-shrink-0">
+                <div className="flex items-center gap-3.5 min-w-0 pr-4">
+                  <span className="text-xs font-bold text-[#cfc2d6]/60 w-5 text-center flex-shrink-0">
                     {idx + 1}
                   </span>
-                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#2a2a2a] flex-shrink-0 border border-white/10">
-                    <img src={track.artwork} alt={track.title} className="w-full h-full object-cover" />
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-[#2a2a2a] border border-white/10">
+                    <img
+                      src={track.artwork}
+                      alt={track.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {isCurrent && isPlaying && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-0.5">
+                        <span className="w-0.5 bg-[#4cd7f6] rounded-full equalizer-bar-1"></span>
+                        <span className="w-0.5 bg-[#ddb7ff] rounded-full equalizer-bar-2"></span>
+                        <span className="w-0.5 bg-[#4cd7f6] rounded-full equalizer-bar-3"></span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={`text-sm font-bold truncate ${isCurrent ? 'text-[#ddb7ff]' : 'text-white'}`}>
@@ -144,10 +164,12 @@ export default function ArtistScreen({ artistName, onBack }) {
                   <button
                     onClick={() => toggleLike(track)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#ddb7ff] active:scale-90 transition-transform"
+                    aria-label="Like track"
                   >
-                    <span className={`material-symbols-outlined text-[20px] ${isLiked(track.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''}`}>
-                      {isLiked(track.id) ? 'favorite' : 'favorite_border'}
-                    </span>
+                    <Heart
+                      size={18}
+                      className={`${isLiked(track.id) ? 'fill-[#ddb7ff] text-[#ddb7ff]' : 'text-[#cfc2d6]'}`}
+                    />
                   </button>
                   <button
                     onClick={() => {
@@ -158,10 +180,13 @@ export default function ArtistScreen({ artistName, onBack }) {
                       }
                     }}
                     className="w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-[#ddb7ff] hover:text-[#400071] text-white active:scale-90 transition-all"
+                    aria-label="Play or pause"
                   >
-                    <span className="material-symbols-outlined text-[20px] font-bold">
-                      {isCurrent && isPlaying ? 'pause' : 'play_arrow'}
-                    </span>
+                    {isCurrent && isPlaying ? (
+                      <Pause size={16} className="fill-current" />
+                    ) : (
+                      <Play size={16} className="fill-current translate-x-0.5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -173,35 +198,39 @@ export default function ArtistScreen({ artistName, onBack }) {
       {/* Discography Albums */}
       {artistData.albums?.length > 0 && (
         <section className="px-4 sm:px-6 space-y-4">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            Discography
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Discography & Albums</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {artistData.albums.map((album) => (
               <div
                 key={album.id}
-                className="group flex flex-col p-3 rounded-2xl bg-[#1c1b1b]/80 hover:bg-[#201f1f] border border-white/5 transition-all"
+                className="group flex flex-col p-3 rounded-2xl bg-[#201f1f] hover:bg-[#2a2a2a] border border-white/5 hover:border-[#ddb7ff]/30 cursor-pointer transition-all duration-300"
               >
-                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#2a2a2a] mb-2">
-                  <img src={album.artwork} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-2 bg-[#131313] border border-white/10">
+                  <img
+                    src={album.artwork || artistData.headerImage}
+                    alt={album.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-                <span className="text-xs font-bold text-white truncate">{album.title}</span>
-                <span className="text-[10px] text-[#cfc2d6]/60 mt-0.5">{album.year} • Album</span>
+                <span className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-[#ddb7ff] transition-colors">
+                  {album.title}
+                </span>
+                <span className="text-[11px] text-[#cfc2d6]/70 mt-0.5">{album.year} • Album</span>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* About Section */}
-      <section className="px-4 sm:px-6">
-        <div className="p-6 rounded-3xl bg-[#1c1b1b]/80 border border-white/10 space-y-3">
-          <h3 className="text-lg font-extrabold text-white">About the Artist</h3>
-          <p className="text-sm text-[#cfc2d6] leading-relaxed">
-            {artistData.bio}
-          </p>
-        </div>
-      </section>
+      {/* Artist Bio */}
+      {artistData.bio && (
+        <section className="px-4 sm:px-6">
+          <div className="p-6 rounded-3xl bg-[#201f1f]/60 border border-white/10 space-y-2">
+            <h3 className="text-base font-extrabold text-white">About the Artist</h3>
+            <p className="text-xs sm:text-sm text-[#cfc2d6] leading-relaxed">{artistData.bio}</p>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

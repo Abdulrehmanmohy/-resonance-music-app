@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { Play, Pause, SkipForward, Heart } from 'lucide-react';
 
 export default function MiniPlayer() {
   const {
@@ -73,9 +74,10 @@ export default function MiniPlayer() {
               className="w-8 h-8 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-[#ddb7ff] active:scale-90 transition-transform"
               aria-label="Like"
             >
-              <span className={`material-symbols-outlined text-[20px] ${isLiked(currentTrack.id) ? 'text-[#ddb7ff] fill-current font-bold' : ''}`}>
-                {isLiked(currentTrack.id) ? 'favorite' : 'favorite_border'}
-              </span>
+              <Heart
+                size={18}
+                className={`${isLiked(currentTrack.id) ? 'fill-[#ddb7ff] text-[#ddb7ff]' : 'text-[#cfc2d6]'}`}
+              />
             </button>
 
             {/* Play / Pause CTA Pill */}
@@ -84,9 +86,11 @@ export default function MiniPlayer() {
               className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#b76dff] to-[#4cd7f6] text-[#0e0e0e] shadow-[0_0_16px_rgba(183,109,255,0.45)] hover:scale-105 active:scale-95 transition-all"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
-              <span className="material-symbols-outlined text-[24px] font-bold">
-                {isPlaying ? 'pause' : 'play_arrow'}
-              </span>
+              {isPlaying ? (
+                <Pause size={18} className="fill-[#0e0e0e]" />
+              ) : (
+                <Play size={18} className="fill-[#0e0e0e] translate-x-0.5" />
+              )}
             </button>
 
             {/* Next Track */}
@@ -95,9 +99,7 @@ export default function MiniPlayer() {
               className="w-8 h-8 rounded-full flex items-center justify-center text-[#cfc2d6] hover:text-white active:scale-90 transition-transform"
               aria-label="Next track"
             >
-              <span className="material-symbols-outlined text-[22px]">
-                skip_next
-              </span>
+              <SkipForward size={18} />
             </button>
           </div>
         </div>

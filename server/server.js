@@ -38,195 +38,27 @@ function formatTrack(item) {
   };
 }
 
-// Fallback high-quality curated tracks for instant zero-latency loading
-const CURATED_TRACKS = {
-  urdu: [
-    {
-      id: 'urdu_1',
-      title: 'Kahani Suno 2.0',
-      artist: 'Kaifi Khalil',
-      album: 'Kahani Suno',
-      artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
-      durationMs: 174000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/78/23/75/78237534-1462-7779-165f-502bf22bed03/mzaf_15915982225370167762.plus.aac.p.m4a',
-      genre: 'Urdu Pop / Indie',
-      releaseDate: '2022',
-      isExplicit: false,
-    },
-    {
-      id: 'urdu_2',
-      title: 'Tajdar-e-Haram',
-      artist: 'Atif Aslam',
-      album: 'Coke Studio Season 8',
-      artwork: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
-      durationMs: 240000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/ce/22/0c/ce220c54-4740-42cf-36aa-060481c5040a/mzaf_16489370884617571340.plus.aac.p.m4a',
-      genre: 'Sufi / Coke Studio',
-      releaseDate: '2015',
-      isExplicit: false,
-    },
-    {
-      id: 'urdu_3',
-      title: 'Afsaanay',
-      artist: 'Young Stunners, Talha Anjum, Talhah Yunus',
-      album: 'Afsaanay - Single',
-      artwork: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&auto=format&fit=crop&q=80',
-      durationMs: 232000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/10/d8/1c/10d81c16-b1cb-1718-eef7-86c8d4a66a15/mzaf_4078491873837965373.plus.aac.p.m4a',
-      genre: 'Urdu Hip-Hop',
-      releaseDate: '2021',
-      isExplicit: true,
-    },
-    {
-      id: 'urdu_4',
-      title: 'Pasoori',
-      artist: 'Ali Sethi & Shae Gill',
-      album: 'Coke Studio Season 14',
-      artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-      durationMs: 224000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/4a/1b/02/4a1b0264-c0e8-07db-5e04-8b64b143c683/mzaf_13596707328904715568.plus.aac.p.m4a',
-      genre: 'World / Fusion',
-      releaseDate: '2022',
-      isExplicit: false,
-    },
-    {
-      id: 'urdu_5',
-      title: 'Bikhra',
-      artist: 'Abdul Hannan & Rovalio',
-      album: 'Bikhra - Single',
-      artwork: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&auto=format&fit=crop&q=80',
-      durationMs: 189000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/eb/8c/19/eb8c1990-2e0f-90fc-3b3d-1eb956276800/mzaf_1009893977531778930.plus.aac.p.m4a',
-      genre: 'Urdu Indie Pop',
-      releaseDate: '2022',
-      isExplicit: false,
-    }
-  ],
-  indian: [
-    {
-      id: 'indian_1',
-      title: 'Kesariya',
-      artist: 'Arijit Singh & Pritam',
-      album: 'Brahmastra',
-      artwork: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80',
-      durationMs: 268000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/90/e5/22/90e522d0-7a05-1a3b-2877-c918c544e311/mzaf_4614213303668102148.plus.aac.p.m4a',
-      genre: 'Bollywood',
-      releaseDate: '2022',
-      isExplicit: false,
-    },
-    {
-      id: 'indian_2',
-      title: 'Tum Hi Ho',
-      artist: 'Arijit Singh & Mithoon',
-      album: 'Aashiqui 2',
-      artwork: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&auto=format&fit=crop&q=80',
-      durationMs: 262000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/e5/1e/8a/e51e8a94-4340-96f3-a178-0cb933752e25/mzaf_17208696773307584168.plus.aac.p.m4a',
-      genre: 'Bollywood Romance',
-      releaseDate: '2013',
-      isExplicit: false,
-    },
-    {
-      id: 'indian_3',
-      title: 'Brown Munde',
-      artist: 'AP Dhillon, Gurinder Gill, Shinda Kahlon',
-      album: 'Brown Munde - Single',
-      artwork: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
-      durationMs: 247000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/37/10/7c/37107cfa-65be-82f1-6789-9eb10a2bbdb9/mzaf_15729707268800588636.plus.aac.p.m4a',
-      genre: 'Punjabi Hip-Hop',
-      releaseDate: '2020',
-      isExplicit: false,
-    },
-    {
-      id: 'indian_4',
-      title: '295',
-      artist: 'Sidhu Moose Wala',
-      album: 'Moosetape',
-      artwork: 'https://images.unsplash.com/photo-1445985543470-41f30c08f107?w=600&auto=format&fit=crop&q=80',
-      durationMs: 270000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/65/59/31/6559313d-8869-7977-1065-0bc49fc0e092/mzaf_1578500275537449339.plus.aac.p.m4a',
-      genre: 'Punjabi Rap',
-      releaseDate: '2021',
-      isExplicit: true,
-    },
-    {
-      id: 'indian_5',
-      title: 'Kun Faya Kun',
-      artist: 'A.R. Rahman, Javed Ali, Mohit Chauhan',
-      album: 'Rockstar',
-      artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-      durationMs: 473000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/8a/0a/60/8a0a6042-491f-0a06-a889-ff8205f0134d/mzaf_16886617066986518167.plus.aac.p.m4a',
-      genre: 'Sufi Devotional',
-      releaseDate: '2011',
-      isExplicit: false,
-    }
-  ],
-  english: [
-    {
-      id: 'eng_1',
-      title: 'Blinding Lights',
-      artist: 'The Weeknd',
-      album: 'After Hours',
-      artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
-      durationMs: 200000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/cd/b9/eb/cdb9eb57-0a42-7efc-d10a-3a223f03b5f9/mzaf_12411624896068305719.plus.aac.p.m4a',
-      genre: 'Synthwave / Pop',
-      releaseDate: '2020',
-      isExplicit: false,
-    },
-    {
-      id: 'eng_2',
-      title: 'Starboy (feat. Daft Punk)',
-      artist: 'The Weeknd',
-      album: 'Starboy',
-      artwork: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
-      durationMs: 230000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/28/19/29/2819293f-67ee-0ee9-43c2-d3a985e505ba/mzaf_9748648174575971488.plus.aac.p.m4a',
-      genre: 'R&B / Electro',
-      releaseDate: '2016',
-      isExplicit: true,
-    },
-    {
-      id: 'eng_3',
-      title: 'Cruel Summer',
-      artist: 'Taylor Swift',
-      album: 'Lover',
-      artwork: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&auto=format&fit=crop&q=80',
-      durationMs: 178000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/21/df/bf/21dfbfb9-ef61-fc4e-3f73-047b337c8da1/mzaf_15091703666505081545.plus.aac.p.m4a',
-      genre: 'Pop',
-      releaseDate: '2019',
-      isExplicit: false,
-    },
-    {
-      id: 'eng_4',
-      title: 'Birds of a Feather',
-      artist: 'Billie Eilish',
-      album: 'HIT ME HARD AND SOFT',
-      artwork: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80',
-      durationMs: 196000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8e/3c/6f/8e3c6f14-e59e-1f81-54bc-447551ae68e8/mzaf_17726588233777592994.plus.aac.p.m4a',
-      genre: 'Alternative Pop',
-      releaseDate: '2024',
-      isExplicit: false,
-    },
-    {
-      id: 'eng_5',
-      title: 'Lose Yourself',
-      artist: 'Eminem',
-      album: '8 Mile (Music from the Motion Picture)',
-      artwork: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&auto=format&fit=crop&q=80',
-      durationMs: 326000,
-      streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/24/4d/5f/244d5fa3-d2d8-2a14-d07f-71239c0f91bc/mzaf_13506456722353724855.plus.aac.p.m4a',
-      genre: 'Hip-Hop / Rap',
-      releaseDate: '2002',
-      isExplicit: true,
-    }
-  ]
-};
+// Verified active tracks for zero-latency instant playback
+const VERIFIED_TRACKS_FILE = path.join(__dirname, 'verified_tracks.json');
+let CURATED_TRACKS = { urdu: [], indian: [], english: [], featured: [] };
+
+try {
+  if (fs.existsSync(VERIFIED_TRACKS_FILE)) {
+    const rawData = JSON.parse(fs.readFileSync(VERIFIED_TRACKS_FILE, 'utf-8'));
+    CURATED_TRACKS = {
+      urdu: rawData.urdu || [],
+      indian: rawData.indian || [],
+      english: rawData.english || [],
+      featured: [
+        ...(rawData.urdu || []).slice(0, 2),
+        ...(rawData.indian || []).slice(0, 2),
+        ...(rawData.english || []).slice(0, 2),
+      ],
+    };
+  }
+} catch (err) {
+  console.error('Error loading verified tracks:', err);
+}
 
 // Playlists store file
 const PLAYLISTS_FILE = path.join(__dirname, 'playlists_data.json');
@@ -509,6 +341,25 @@ app.post('/api/playlists/:id/tracks', (req, res) => {
     savePlaylists(playlists);
   }
   res.json(pl);
+});
+
+
+// Audio stream proxy endpoint
+app.get('/api/stream', async (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).send('Missing url parameter');
+  try {
+    const audioRes = await fetch(url);
+    if (!audioRes.ok) return res.status(audioRes.status).send('Upstream audio error');
+    res.setHeader('Content-Type', audioRes.headers.get('content-type') || 'audio/mp4');
+    res.setHeader('Accept-Ranges', 'bytes');
+    const len = audioRes.headers.get('content-length');
+    if (len) res.setHeader('Content-Length', len);
+    const arrayBuffer = await audioRes.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
+  } catch (e) {
+    res.status(500).send('Stream error: ' + e.message);
+  }
 });
 
 // Serve static files from Vite build in production

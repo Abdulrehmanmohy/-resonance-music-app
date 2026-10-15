@@ -212,6 +212,16 @@ export function PlayerProvider({ children }) {
 
     const handleError = (e) => {
       console.warn('Audio playback error on stream URL:', currentTrack?.streamUrl, e);
+      if (currentTrack?.streamUrl && !currentTrack.streamUrl.startsWith('/api/stream')) {
+        const proxyUrl = `/api/stream?url=${encodeURIComponent(currentTrack.streamUrl)}`;
+        audio.src = proxyUrl;
+        audio.load();
+        audio
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
+        return;
+      }
       setIsPlaying(false);
     };
 
